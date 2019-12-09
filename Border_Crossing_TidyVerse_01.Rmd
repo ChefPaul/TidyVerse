@@ -1,0 +1,99 @@
+---
+title: "Border Crossing Entry Data"
+author: "Paul Perez"
+date: "12/1/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Library
+```{r library, echo=FALSE}
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
+## Packages
+```{r}
+library(tibble)
+library(dplyr)
+```
+
+## Data
+We're going to use a 'Border Crossing' data set from The Bureau of Transportation Statistics (BTS) which provides summary statistics for inbound crossings at the U.S. - Canada and the U.S. - Mexico border. For more info, check out the kaggle [link](https://www.kaggle.com/akhilv11/border-crossing-entry-data).
+
+#### Opening a .csv with the utils package function, read.csv()
+
+```{r data}
+data <- read.csv('Border_Crossing_Entry_Data.csv')
+head(data)
+class(data)
+```
+
+We're reading the head of the dataframe to preview the dataset. We can see that the column names that have a space automatically replace the space with a `.` and we can also see the datatypes for each column right below.
+
+#### Opening a .csv with the readr package function, read_csv()
+
+```{r read csv}
+data2 <- read_csv('Border_Crossing_Entry_Data.csv')
+head(data2)
+class(data2)
+```
+
+We'll notice a very similar output as the one above, but with slight variations. Our column names are true to the file in which there are spaces between words. Again, we see datatypes below the column names, but this time they are different types. They are no longer factors wherever the integers are. Since the `Date` column is not a date type, we'll convert that.
+
+```{r date}
+data2$Date <- as.Date(data2$Date, "%m/%d/%Y")
+head(data2)
+```
+
+## Select Function
+Next, we'll use the `select()` function of the `dplyr` package to select specific and set of columns or variables desired.
+
+We'll `select()` the Border, State, Port Name, Port Code. 
+
+**Note: Since `Port Name` and `Port Code` have spaces inbetween them, we'll need to add quotes around those columns**
+
+```{r select}
+border_data <- select(data2, Border, State, 'Port Name', 'Port Code')
+head(border_data)
+```
+
+## Filter Function
+
+If we wanted to only look at data from this set where the border was `US-Mexico Border` only, then we can use the `filter()` function.
+
+```{r filter}
+us_mex_data <- filter(data2, Border=='US-Mexico Border')
+head(us_mex_data)
+```
+
+Taking it a step further, if we wanted to filter for a specific date range, like April of 2014, then we can add `,` in the `filter()` function. Since this data set has rolled up data at a monthly level, we'll need to use an `==` statement for the April, 2014.
+
+```{r filter 2}
+us_mex_data_2014_04 <- filter(data2, Border=='US-Mexico Border', Date == '2014-04-01')
+head(us_mex_data_2014_04)
+```
+
+## Arange Function
+
+Next, we can arrange the data how we want in ascending or descending order using the `arrange()` function.
+
+```{r arrange}
+us_mex_data_2014_04 <- arrange(us_mex_data_2014_04, State)
+head(us_mex_data_2014_04)
+```
+
+## Piping multiple functions into one statement
+
+We'll take everything we went through so far and combine it into one statement using piping `%>%` for the `US-Canada Border` in January, 2015.
+
+```{r piping}
+us_can_data_2015_01 <- data2 %>% select(Border, State, 'Port Name', 'Port Code', Date) %>% filter(Border=='US-Canada Border', Date == '2015-01-01') %>% arrange(State)
+
+head(us_can_data_2015_01)
+```
